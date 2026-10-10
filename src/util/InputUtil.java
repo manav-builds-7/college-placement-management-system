@@ -23,6 +23,9 @@ public class InputUtil {
     /** Reads one line of text. May be empty. */
     public String readString(String prompt) {
         System.out.print(prompt);
+        if (!scanner.hasNextLine()) {
+            throw new IllegalStateException("No input available. Exiting.");
+        }
         return scanner.nextLine();
     }
 

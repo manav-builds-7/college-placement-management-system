@@ -18,12 +18,54 @@ Supporting packages: model, interfaces, enums, exception, util, file.
 
 ## Setup
 
-1. Install MySQL and start the server.
-2. Run the schema from the project root:
-   `mysql -u root -p < database/placement_management.sql`
-3. Edit `db.properties` with your MySQL username and password.
-4. Put `mysql-connector-j-8.x.jar` in the `lib/` folder.
-5. Compile and run (see the commands in the project guide).
+### Prerequisites
+
+- Java 17 or newer
+- MySQL 8.x, running locally
+- MySQL Connector/J 8.x
+
+### Configure and initialize
+
+Open PowerShell in the project root:
+
+```powershell
+cd E:\Programs\Java\Project
+```
+
+Edit `db.properties` and set `db.user` and `db.password` to your MySQL credentials.
+Make sure `db.url` points to the database `placement_management`.
+
+If the JDBC driver is not already in `lib/`, download it:
+
+```powershell
+New-Item -ItemType Directory -Force lib | Out-Null
+Invoke-WebRequest `
+  -Uri "https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar" `
+  -OutFile "lib\mysql-connector-j-8.0.33.jar"
+```
+
+Import the schema from PowerShell using `cmd /c` (PowerShell does not support
+the `<` input-redirection operator). MySQL will prompt for the root password:
+
+```powershell
+cmd /c "mysql -u root -p < database\placement_management.sql"
+```
+
+**Warning:** `database\placement_management.sql` drops and recreates the
+`placement_management` database. Importing it again erases existing data.
+
+### Compile and run
+
+Run these commands from the project root in PowerShell:
+
+```powershell
+javac -cp "lib\mysql-connector-j-8.0.33.jar" -d out `
+  (Get-ChildItem -Recurse -Filter *.java -Path src | ForEach-Object FullName)
+java -cp "out;lib\mysql-connector-j-8.0.33.jar" Main
+```
+
+The application starts in the console. Choose **Exit** in the main menu to
+close it.
 
 ## Default accounts
 

@@ -38,15 +38,20 @@ public class LoginMenu {
         boolean running = true;
 
         while (running) {
-            printOptions("MAIN MENU", "Student Login", "Student Registration",
-                    "Placement Officer Login", "Exit");
-            int choice = input.readMenuChoice("Choose an option: ", 1, 4);
+            try {
+                printOptions("MAIN MENU", "Student Login", "Student Registration",
+                        "Placement Officer Login", "Exit");
+                int choice = input.readMenuChoice("Choose an option: ", 1, 4);
 
-            switch (choice) {
-                case 1: runSafely(() -> studentLogin()); break;
-                case 2: runSafely(() -> registerStudent()); break;
-                case 3: runSafely(() -> officerLogin()); break;
-                default: running = false; break;
+                switch (choice) {
+                    case 1: runSafely(() -> studentLogin()); break;
+                    case 2: runSafely(() -> registerStudent()); break;
+                    case 3: runSafely(() -> officerLogin()); break;
+                    default: running = false; break;
+                }
+            } catch (IllegalStateException e) {
+                running = false;
+                System.out.println("\nInput stream closed. Exiting the application.");
             }
         }
         System.out.println("\nThank you for using the College Placement Management System.");

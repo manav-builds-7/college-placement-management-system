@@ -8,10 +8,13 @@ import dao.PlacementOfficerDAO;
 import dao.ResumeDAO;
 import dao.StatisticsDAO;
 import dao.StudentDAO;
+import exception.InvalidInputException;
+import exception.StudentNotFoundException;
 import file.ReportFileHandler;
 import java.sql.SQLException;
 import java.util.Scanner;
 import model.PlacementOfficer;
+import model.Student;
 import service.ApplicationService;
 import service.AuthService;
 import service.CompanyService;
@@ -31,8 +34,8 @@ import util.PasswordUtil;
 
 /**
  * Entry point of the College Placement Management System.
- * Checks the database, makes sure a default officer exists, builds every
- * DAO, service, and menu, and then starts the login screen.
+ * Checks the database, makes sure a default officer and the demo students exist,
+ * builds every DAO, service, and menu, and then starts the login screen.
  * No business rules live here.
  */
 public class Main {
@@ -46,21 +49,26 @@ public class Main {
     private static final String DEFAULT_OFFICER_EMPLOYEE_ID = "EMP-000";
     private static final String DEFAULT_OFFICER_DESIGNATION = "Placement Officer";
 
+    // Demo students, created at startup so the demo data can be used immediately.
+    private static final boolean SEED_DEMO_STUDENTS = true;
+    private static final String DEMO_STUDENT_PASSWORD = "secret123";
+
     public static void main(String[] args) {
-        // 1. Stop early with a clear message if the database cannot be reached
         if (!DBConnection.testConnection()) {
             System.out.println("\nThe program cannot start without the database.");
             System.out.println("Check that MySQL is running and that db.properties is correct.");
             return;
         }
 
-        // The Scanner is closed automatically when the program ends
         try (Scanner scanner = new Scanner(System.in)) {
             ensureDefaultOfficer();
+            if (SEED_DEMO_STUDENTS) {
+                ensureDemoStudents();
+            }
             LoginMenu loginMenu = buildLoginMenu(new InputUtil(scanner));
             loginMenu.run();
-        } catch (SQLException e) {
-            System.out.println("\nDatabase error during startup: " + e.getMessage());
+        } catch (SQLException | InvalidInputException | StudentNotFoundException e) {
+            System.out.println("\nError during startup: " + e.getMessage());
         }
     }
 
@@ -80,6 +88,45 @@ public class Main {
         officerDAO.addOfficer(officer);
         System.out.println("Default officer account created: " + DEFAULT_OFFICER_EMAIL
                 + " / " + DEFAULT_OFFICER_PASSWORD);
+    }
+
+    /**
+     * Creates a couple of demo students with a basic academic profile so the UI can be tested quickly.
+     */
+    private static void ensureDemoStudents() throws SQLException, InvalidInputException, StudentNotFoundException {
+        StudentDAO studentDAO = new StudentDAO();
+        StudentService studentService = new StudentService(studentDAO);
+
+        seedDemoStudent(studentService, studentDAO, "Asha Verma", "asha@mail.com", "9876543210",
+                "CSE", 2027, 8.2, 0, 90, 88, "Jaipur", "Java, SQL");
+        seedDemoStudent(studentService, studentDAO, "Dev Rao", "dev@mail.com", "9123456780",
+                "CSE", 2027, 7.8, 0, 85, 82, "Delhi", "Python, React");
+    }
+
+    /**
+     * Registers one demo student and fills in the academic details if the email is not already used.
+     */
+    private static void seedDemoStudent(StudentService studentService, StudentDAO studentDAO,
+                                       String name, String email, String phone, String department,
+                                       int graduationYear, double cgpa, int backlogs,
+                                       double tenthPercentage, double twelfthPercentage,
+                                       String address, String skills)
+            throws SQLException, InvalidInputException, StudentNotFoundException {
+        if (studentDAO.getStudentByEmail(email) != null) {
+            return;
+        }
+
+        Student student = studentService.registerStudent(name, email, phone, DEMO_STUDENT_PASSWORD);
+        student.setDepartment(department);
+        student.setCourse("B.Tech");
+        student.setGraduationYear(graduationYear);
+        student.setCgpa(cgpa);
+        student.setBacklogs(backlogs);
+        student.setTenthPercentage(tenthPercentage);
+        student.setTwelfthPercentage(twelfthPercentage);
+        student.setAddress(address);
+        student.setSkills(skills);
+        studentService.updateProfile(student);
     }
 
     /**
