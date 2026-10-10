@@ -1,101 +1,127 @@
+import dao.ApplicationDAO;
+import dao.CompanyDAO;
+import dao.InterviewDAO;
+import dao.JobDAO;
+import dao.PlacementDAO;
+import dao.PlacementDriveDAO;
+import dao.PlacementOfficerDAO;
+import dao.ResumeDAO;
+import dao.StatisticsDAO;
+import dao.StudentDAO;
+import file.ReportFileHandler;
+import java.sql.SQLException;
 import java.util.Scanner;
-import model.Admin;
-import model.Recruiter;
-import model.Resume;
-import model.Student;
+import model.PlacementOfficer;
+import service.ApplicationService;
+import service.AuthService;
+import service.CompanyService;
+import service.InterviewService;
+import service.JobService;
+import service.PlacementDriveService;
+import service.PlacementService;
+import service.ReportService;
+import service.ResumeService;
+import service.StudentService;
+import ui.LoginMenu;
+import ui.OfficerMenu;
+import ui.StudentMenu;
+import util.DBConnection;
+import util.InputUtil;
+import util.PasswordUtil;
 
+/**
+ * Entry point of the College Placement Management System.
+ * Checks the database, makes sure a default officer exists, builds every
+ * DAO, service, and menu, and then starts the login screen.
+ * No business rules live here.
+ */
+public class Main {
 
-class Main {
+    // Default officer account, created only when no such account exists yet.
+    // Change the password after the first login in a real deployment.
+    private static final String DEFAULT_OFFICER_NAME = "Default Officer";
+    private static final String DEFAULT_OFFICER_EMAIL = "admin@college.edu";
+    private static final String DEFAULT_OFFICER_PASSWORD = "admin123";
+    private static final String DEFAULT_OFFICER_PHONE = "9000000000";
+    private static final String DEFAULT_OFFICER_EMPLOYEE_ID = "EMP-000";
+    private static final String DEFAULT_OFFICER_DESIGNATION = "Placement Officer";
+
     public static void main(String[] args) {
-        System.out.println("Welcome to College Placement Portal");
-        System.out.println("Please select your role:");
-        System.out.println("1. Student");
-        System.out.println("2. Recruiter");
-        System.out.println("3. Admin");
-
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Choice: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-        switch (choice) {
-            case 1:
-                registerStudent(scanner);
-                break;
-            case 2:
-                registerRecruiter(scanner);
-                break;
-            case 3:
-                registerAdmin(scanner);
-                break;
-            default:
-                System.out.println("Please select a role from 1 to 3.");
-        }
-        scanner.close();
-    }
-
-    // Register for student profile with CGPA validation and optional resume skills
-    private static void registerStudent(Scanner scanner) {
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
-        System.out.print("Student ID: ");
-        String studentId = scanner.nextLine();
-        System.out.print("CGPA (0-10): ");
-        if (!scanner.hasNextDouble()) {
-            System.out.println("CGPA must be a number from 0 to 10.");
+        // 1. Stop early with a clear message if the database cannot be reached
+        if (!DBConnection.testConnection()) {
+            System.out.println("\nThe program cannot start without the database.");
+            System.out.println("Check that MySQL is running and that db.properties is correct.");
             return;
         }
 
-        double cgpa = scanner.nextDouble();
-        if (cgpa < 0 || cgpa > 10) {
-            System.out.println("CGPA must be a number from 0 to 10.");
+        // The Scanner is closed automatically when the program ends
+        try (Scanner scanner = new Scanner(System.in)) {
+            ensureDefaultOfficer();
+            LoginMenu loginMenu = buildLoginMenu(new InputUtil(scanner));
+            loginMenu.run();
+        } catch (SQLException e) {
+            System.out.println("\nDatabase error during startup: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Creates the default officer account if no officer has this email yet.
+     * Running the program again does not create a duplicate.
+     */
+    private static void ensureDefaultOfficer() throws SQLException {
+        PlacementOfficerDAO officerDAO = new PlacementOfficerDAO();
+        if (officerDAO.getOfficerByEmail(DEFAULT_OFFICER_EMAIL) != null) {
             return;
         }
-        scanner.nextLine();
 
-        Student student = new Student(email, username, password, studentId, cgpa);
-        System.out.print("Resume skills (optional): ");
-        String skills = scanner.nextLine();
-        student.setResume(new Resume(skills, "", "", "", "", "", email, username, password, studentId, cgpa));
-
-        System.out.println("Student profile created for " + student.getUsername()
-                + " (ID: " + student.getStudentId() + ").");
+        PlacementOfficer officer = new PlacementOfficer(0, DEFAULT_OFFICER_NAME, DEFAULT_OFFICER_EMAIL,
+                PasswordUtil.hashPassword(DEFAULT_OFFICER_PASSWORD), DEFAULT_OFFICER_PHONE,
+                DEFAULT_OFFICER_EMPLOYEE_ID, DEFAULT_OFFICER_DESIGNATION);
+        officerDAO.addOfficer(officer);
+        System.out.println("Default officer account created: " + DEFAULT_OFFICER_EMAIL
+                + " / " + DEFAULT_OFFICER_PASSWORD);
     }
 
-    // Register for recruiter profile
-    private static void registerRecruiter(Scanner scanner) {
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
-        System.out.print("Company Name: ");
-        String companyName = scanner.nextLine();
-        System.out.print("Company Address: ");
-        String companyAddress = scanner.nextLine();
+    /**
+     * Builds every object in dependency order and returns the login screen.
+     * Each line says which objects it needs, so the wiring is easy to follow.
+     */
+    private static LoginMenu buildLoginMenu(InputUtil input) {
+        // ----- DAOs: only these touch the database -----
+        StudentDAO studentDAO = new StudentDAO();
+        CompanyDAO companyDAO = new CompanyDAO();
+        JobDAO jobDAO = new JobDAO();
+        PlacementDriveDAO driveDAO = new PlacementDriveDAO();
+        ResumeDAO resumeDAO = new ResumeDAO();
+        ApplicationDAO applicationDAO = new ApplicationDAO();
+        InterviewDAO interviewDAO = new InterviewDAO();
+        PlacementDAO placementDAO = new PlacementDAO();
+        PlacementOfficerDAO officerDAO = new PlacementOfficerDAO();
+        StatisticsDAO statisticsDAO = new StatisticsDAO();
 
-        Recruiter recruiter = new Recruiter(email, username, password, companyName, companyAddress);
-        System.out.println("Recruiter profile created for " + recruiter.getUsername()
-                + " (Company: " + recruiter.getCompanyName() + ").");
-    }
+        // ----- Services: built in dependency order -----
+        StudentService studentService = new StudentService(studentDAO);
+        CompanyService companyService = new CompanyService(companyDAO);
+        JobService jobService = new JobService(jobDAO, companyService);
+        PlacementDriveService driveService = new PlacementDriveService(driveDAO, companyService, jobService);
+        ResumeService resumeService = new ResumeService(resumeDAO, studentService);
+        ApplicationService applicationService = new ApplicationService(applicationDAO, studentService, jobService);
+        InterviewService interviewService = new InterviewService(interviewDAO, applicationService);
+        PlacementService placementService = new PlacementService(placementDAO, applicationService,
+                interviewService, studentService, jobService);
+        ReportService reportService = new ReportService(statisticsDAO, studentService, companyService,
+                jobService, driveService, applicationService, interviewService, placementService);
+        AuthService authService = new AuthService(studentService, officerDAO);
+        ReportFileHandler fileHandler = new ReportFileHandler();
 
-    // Register for admin profile
-    private static void registerAdmin(Scanner scanner) {
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
-        System.out.print("Admin ID: ");
-        String adminId = scanner.nextLine();
+        // ----- Menus: built last, because they depend on the services above -----
+        StudentMenu studentMenu = new StudentMenu(input, studentService, resumeService, jobService,
+                companyService, driveService, applicationService, interviewService, placementService,
+                fileHandler);
+        OfficerMenu officerMenu = new OfficerMenu(input, companyService, jobService, driveService,
+                studentService, resumeService, applicationService, interviewService, placementService,
+                reportService, fileHandler);
 
-        Admin admin = new Admin(email, username, password, adminId);
-        System.out.println("Admin profile created for " + admin.getUsername()
-                + " (ID: " + admin.getAdminId() + ").");
+        return new LoginMenu(input, authService, studentService, studentMenu, officerMenu);
     }
 }
