@@ -10,14 +10,13 @@ import java.sql.SQLException;
 import java.util.List;
 
 /** The officer's company management screens: add, update, delete, view, and search. */
-public class CompanyMenu {
-
-    private static final int WIDTH = 64;
+public class CompanyMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final CompanyService companyService;
 
     public CompanyMenu(InputUtil input, CompanyService companyService) {
+        super(64);
         this.input = input;
         this.companyService = companyService;
     }
@@ -97,7 +96,7 @@ public class CompanyMenu {
         }
         System.out.println(String.format("%-5s %-20s %-14s %-14s %-14s %s",
                 "ID", "Company", "Industry", "Location", "HR", "HR phone"));
-        System.out.println("-".repeat(WIDTH));
+        System.out.println("-".repeat(width));
         for (Company company : companies) {
             System.out.println(String.format("%-5d %-20s %-14s %-14s %-14s %s",
                     company.getCompanyId(), company.getCompanyName(), company.getIndustry(),
@@ -125,19 +124,4 @@ public class CompanyMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        printTitle(title);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(WIDTH));
-    }
-
-    private void printTitle(String title) {
-        System.out.println("=".repeat(WIDTH));
-        int padding = Math.max(0, (WIDTH - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(WIDTH));
-    }
 }

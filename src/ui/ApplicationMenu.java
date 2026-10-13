@@ -19,9 +19,7 @@ import java.util.List;
  * The officer's application review. Shortlisting and rejecting go through
  * ApplicationService, which enforces the status rules.
  */
-public class ApplicationMenu {
-
-    private static final int WIDTH = 72;
+public class ApplicationMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final ApplicationService applicationService;
@@ -30,6 +28,7 @@ public class ApplicationMenu {
 
     public ApplicationMenu(InputUtil input, ApplicationService applicationService,
                            StudentService studentService, JobService jobService) {
+        super(72);
         this.input = input;
         this.applicationService = applicationService;
         this.studentService = studentService;
@@ -96,7 +95,7 @@ public class ApplicationMenu {
         }
         System.out.println(String.format("%-7s %-22s %-24s %-11s %s",
                 "App ID", "Student", "Job", "Applied", "Status"));
-        System.out.println("-".repeat(WIDTH));
+        System.out.println("-".repeat(width));
         for (Application application : applications) {
             Student student = studentService.findStudent(application.getStudentId());
             Job job = jobService.findJob(application.getJobId());
@@ -130,19 +129,4 @@ public class ApplicationMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        printTitle(title);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(WIDTH));
-    }
-
-    private void printTitle(String title) {
-        System.out.println("=".repeat(WIDTH));
-        int padding = Math.max(0, (WIDTH - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(WIDTH));
-    }
 }

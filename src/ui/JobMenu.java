@@ -16,15 +16,14 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /** The officer's job management screens: add, update, delete, view, and search. */
-public class JobMenu {
-
-    private static final int WIDTH = 64;
+public class JobMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final JobService jobService;
     private final CompanyService companyService;
 
     public JobMenu(InputUtil input, JobService jobService, CompanyService companyService) {
+        super(64);
         this.input = input;
         this.jobService = jobService;
         this.companyService = companyService;
@@ -206,19 +205,4 @@ public class JobMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        printTitle(title);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(WIDTH));
-    }
-
-    private void printTitle(String title) {
-        System.out.println("=".repeat(WIDTH));
-        int padding = Math.max(0, (WIDTH - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(WIDTH));
-    }
 }

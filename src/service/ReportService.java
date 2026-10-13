@@ -1,6 +1,7 @@
 package service;
 
 import dao.StatisticsDAO;
+import interfaces.Reportable;
 import model.Application;
 import model.Company;
 import model.Interview;
@@ -73,7 +74,7 @@ public class ReportService {
         appendTitle(sb, "COMPANY REPORT");
         List<Company> companies = companyService.getAllCompanies();
         for (Company company : companies) {
-            sb.append(company.generateReport()).append("\n").append(SINGLE_LINE).append("\n");
+            appendReportable(sb, company);
         }
         sb.append(row("Total companies", companies.size()));
         return sb.toString();
@@ -85,13 +86,16 @@ public class ReportService {
         Map<Integer, String> companyNames = companyNamesById();
         List<Job> jobs = jobService.getAllJobs();
         for (Job job : jobs) {
-            sb.append(String.format(Locale.US, "%-26s %-20s %5.2f LPA  deadline %s%n",
-                    job.getTitle(), companyNames.get(job.getCompanyId()),
-                    job.getCtc(), job.getApplicationDeadline()));
+            sb.append("Company    : ").append(companyNames.get(job.getCompanyId())).append("\n");
+            appendReportable(sb, job);
         }
         sb.append(SINGLE_LINE).append("\n");
         sb.append(row("Total jobs", jobs.size()));
         return sb.toString();
+    }
+
+    private void appendReportable(StringBuilder sb, Reportable reportable) {
+        sb.append(reportable.generateReport()).append("\n").append(SINGLE_LINE).append("\n");
     }
 
     public String applicationReport() throws SQLException {

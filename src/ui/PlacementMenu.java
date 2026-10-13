@@ -21,9 +21,7 @@ import java.util.List;
  * The selection stage: select students, record offers and joining dates, and list results.
  * PlacementService checks every rule before it writes anything.
  */
-public class PlacementMenu {
-
-    private static final int WIDTH = 72;
+public class PlacementMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final PlacementService placementService;
@@ -32,6 +30,7 @@ public class PlacementMenu {
 
     public PlacementMenu(InputUtil input, PlacementService placementService,
                          StudentService studentService, CompanyService companyService) {
+        super(72);
         this.input = input;
         this.placementService = placementService;
         this.studentService = studentService;
@@ -121,7 +120,7 @@ public class PlacementMenu {
             return;
         }
         System.out.println(String.format("%-5s %-22s %-8s %6s %9s", "ID", "Name", "Dept", "CGPA", "Backlogs"));
-        System.out.println("-".repeat(WIDTH));
+        System.out.println("-".repeat(width));
         for (Student student : unplaced) {
             System.out.println(String.format("%-5d %-22s %-8s %6.2f %9d",
                     student.getStudentId(), student.getName(), student.getDepartment(),
@@ -147,19 +146,4 @@ public class PlacementMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        printTitle(title);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(WIDTH));
-    }
-
-    private void printTitle(String title) {
-        System.out.println("=".repeat(WIDTH));
-        int padding = Math.max(0, (WIDTH - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(WIDTH));
-    }
 }
