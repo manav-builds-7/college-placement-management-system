@@ -16,14 +16,13 @@ import java.util.List;
  * The officer's interview screens: schedule rounds, record results, and review them.
  * All rules (order of rounds, one result only, date checks) are in InterviewService.
  */
-public class InterviewMenu {
-
-    private static final int WIDTH = 72;
+public class InterviewMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final InterviewService interviewService;
 
     public InterviewMenu(InputUtil input, InterviewService interviewService) {
+        super(72);
         this.input = input;
         this.interviewService = interviewService;
     }
@@ -134,19 +133,4 @@ public class InterviewMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        printTitle(title);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(WIDTH));
-    }
-
-    private void printTitle(String title) {
-        System.out.println("=".repeat(WIDTH));
-        int padding = Math.max(0, (WIDTH - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(WIDTH));
-    }
 }

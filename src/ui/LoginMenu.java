@@ -13,9 +13,7 @@ import java.sql.SQLException;
  * The first screen the user sees. Routes to the student portal or the officer
  * dashboard after a successful login. Returns here when that session ends.
  */
-public class LoginMenu {
-
-    private static final int WIDTH = 64;
+public class LoginMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final AuthService authService;
@@ -25,6 +23,7 @@ public class LoginMenu {
 
     public LoginMenu(InputUtil input, AuthService authService, StudentService studentService,
                      StudentMenu studentMenu, OfficerMenu officerMenu) {
+        super(64);
         this.input = input;
         this.authService = authService;
         this.studentService = studentService;
@@ -109,19 +108,4 @@ public class LoginMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        printTitle(title);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(WIDTH));
-    }
-
-    private void printTitle(String title) {
-        System.out.println("=".repeat(WIDTH));
-        int padding = Math.max(0, (WIDTH - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(WIDTH));
-    }
 }

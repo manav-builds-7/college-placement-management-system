@@ -29,9 +29,7 @@ import java.util.List;
  * The placement officer's dashboard. It opens one screen per area and keeps
  * the placement drive screens itself.
  */
-public class OfficerMenu {
-
-    private static final int WIDTH = 64;
+public class OfficerMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final CompanyService companyService;
@@ -50,6 +48,7 @@ public class OfficerMenu {
                        ResumeService resumeService, ApplicationService applicationService,
                        InterviewService interviewService, PlacementService placementService,
                        ReportService reportService, ReportFileHandler fileHandler) {
+        super(64);
         this.input = input;
         this.companyService = companyService;
         this.driveService = driveService;
@@ -252,19 +251,4 @@ public class OfficerMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        printTitle(title);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(WIDTH));
-    }
-
-    private void printTitle(String title) {
-        System.out.println("=".repeat(WIDTH));
-        int padding = Math.max(0, (WIDTH - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(WIDTH));
-    }
 }

@@ -35,9 +35,7 @@ import java.util.List;
  * The student portal. Every option calls a service and prints the result.
  * No business rules live here.
  */
-public class StudentMenu {
-
-    private static final int WIDTH = 64;
+public class StudentMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final StudentService studentService;
@@ -55,6 +53,7 @@ public class StudentMenu {
                        PlacementDriveService driveService, ApplicationService applicationService,
                        InterviewService interviewService, PlacementService placementService,
                        ReportFileHandler fileHandler) {
+        super(64);
         this.input = input;
         this.studentService = studentService;
         this.resumeService = resumeService;
@@ -253,7 +252,7 @@ public class StudentMenu {
         }
         System.out.println(String.format("%-5s %-24s %-18s %6s %8s  %s",
                 "ID", "Title", "Company", "CTC", "Min CGPA", "Deadline"));
-        System.out.println("-".repeat(WIDTH));
+        System.out.println("-".repeat(width));
         for (Job job : jobs) {
             Company company = companyService.findCompany(job.getCompanyId());
             System.out.println(String.format("%-5d %-24s %-18s %6.2f %8.2f  %s",
@@ -422,19 +421,4 @@ public class StudentMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        printTitle(title);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(WIDTH));
-    }
-
-    private void printTitle(String title) {
-        System.out.println("=".repeat(WIDTH));
-        int padding = Math.max(0, (WIDTH - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(WIDTH));
-    }
 }

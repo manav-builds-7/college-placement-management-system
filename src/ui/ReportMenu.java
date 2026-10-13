@@ -12,13 +12,14 @@ import java.sql.SQLException;
  * Lets the officer print any report to the terminal and optionally save it as a TXT file.
  * ReportService builds the text, and ReportFileHandler writes it.
  */
-public class ReportMenu {
+public class ReportMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final ReportService reportService;
     private final ReportFileHandler fileHandler;
 
     public ReportMenu(InputUtil input, ReportService reportService, ReportFileHandler fileHandler) {
+        super(64);
         this.input = input;
         this.reportService = reportService;
         this.fileHandler = fileHandler;
@@ -84,15 +85,4 @@ public class ReportMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        System.out.println("=".repeat(64));
-        int padding = Math.max(0, (64 - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(64));
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(64));
-    }
 }

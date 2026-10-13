@@ -45,6 +45,10 @@ public final class DBConnection {
      */
     public static boolean testConnection() {
         try (Connection connection = getConnection()) {
+            if (!connection.isValid(2)) {
+                System.out.println("Database connection failed: connection is not valid.");
+                return false;
+            }
             System.out.println("Database connection successful.");
             return true;
         } catch (SQLException e) {

@@ -17,15 +17,14 @@ import java.util.List;
  * The officer's view of students: list, search, filter, and inspect profiles and resumes.
  * Read-only: officers cannot change student records from this screen.
  */
-public class StudentProfileMenu {
-
-    private static final int WIDTH = 64;
+public class StudentProfileMenu extends ConsoleMenu {
 
     private final InputUtil input;
     private final StudentService studentService;
     private final ResumeService resumeService;
 
     public StudentProfileMenu(InputUtil input, StudentService studentService, ResumeService resumeService) {
+        super(64);
         this.input = input;
         this.studentService = studentService;
         this.resumeService = resumeService;
@@ -112,7 +111,7 @@ public class StudentProfileMenu {
         }
         System.out.println(String.format("%-5s %-22s %-8s %6s %9s  %s",
                 "ID", "Name", "Dept", "CGPA", "Backlogs", "Status"));
-        System.out.println("-".repeat(WIDTH));
+        System.out.println("-".repeat(width));
         for (Student student : students) {
             System.out.println(String.format("%-5d %-22s %-8s %6.2f %9d  %s",
                     student.getStudentId(), student.getName(), student.getDepartment(),
@@ -144,19 +143,4 @@ public class StudentProfileMenu {
         }
     }
 
-    private void printOptions(String title, String... options) {
-        System.out.println();
-        printTitle(title);
-        for (int i = 0; i < options.length; i++) {
-            System.out.println("  " + (i + 1) + ". " + options[i]);
-        }
-        System.out.println("=".repeat(WIDTH));
-    }
-
-    private void printTitle(String title) {
-        System.out.println("=".repeat(WIDTH));
-        int padding = Math.max(0, (WIDTH - title.length()) / 2);
-        System.out.println(" ".repeat(padding) + title);
-        System.out.println("=".repeat(WIDTH));
-    }
 }
